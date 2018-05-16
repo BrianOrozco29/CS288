@@ -1,0 +1,57 @@
+Write a C program which prints out the first part of a text file onto screen, similar to the head tool in Linux.
+
+Detailed requirements:
+
+1. Name the program hw1_2.c.  The grader may use a script to find and test your programs. The script will not find your program if the program has a different name.
+
+2. The program should only call read() system call to read the file. C library functions for reading files, such as fread(), are not allowed  (programs finished with these functions will not be graded).
+
+3. You can decide how much content is read from the file every time (each read() call). It is not specified in the command line.
+
+4. The program should analyze arguments in the command line, in order to determine 1) which file to open and 2) how many lines at the beginning of the file should be printed out onto screen.  The format of the command for running the program is as follows (Important! If you don't follow strictly, the script testing your program may not be able to run your program correctly, and you may get lower grades).
+
+./hw1_2   -n    #lines      pathname
+
+#lines: the number of lines at the beginning of the file that should be printed out onto the screen.
+
+pathname: the pathname of the file
+
+5. The output should be identical to the output of head tool with the same arguments.
+
+Grading:
+
+1. The executable file can be successfully generated with gcc ---- +5 points
+
+gcc your_program_file -o hw1_2
+
+2. The program can finish within 1 minute without crash when it is run with the following command: ---- +10 points
+
+START=$(date +%s.%N)
+
+./hw1_2 -n 10 /etc/passwd 
+
+END=$(date +%s.%N)
+
+DIFF2=$(echo "$END - $START" | bc)
+
+if [ $DIFF2 -lt 60 ]; then
+
+echo "rule2: $entry: 10"
+
+fi
+
+3. The first line of the file can be printed out. --- +10 points
+
+./hw1_2 -n 1 /etc/passwd 
+
+4. The output is identical to the output of head command with the same arguments. --- +25 points
+
+./hw1_2  -n 10 /etc/passwd &> ./tmp 
+
+head -n 10 /etc/passwd &> ./tmp1 &
+diff_outputs=`diff ./tmp ./tmp1`
+if [ "$diff_outputs" == "" ]; then
+echo "rule4: $entry: 25"
+fi
+
+The outputs will be saved into files and compared with diff tool under linux. You may redirect the outputs into files, and use diff to compare the files. Diff should not generate any output. 
