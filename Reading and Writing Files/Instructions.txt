@@ -1,0 +1,113 @@
+Write a C program, which
+
+1. opens an existing file;
+
+2. creates a new file;
+
+3. in a loop, reads content from the existing file and writes the content into the new file until reaching the end of the existing file;
+
+Detailed requirements:
+
+1. Name the program hw1_1.c.  The grader may use a script to find and test your programs. The script will not find your program if the program has a different name.
+
+2. The program should only call read() and write() system calls to read and write files. C library functions for reading and writing files, such as fread() and fwrite(), are not allowed  (programs finished with these functions will not be graded).
+
+3. How much content is read from the file every time (each read() call) should be determined by an argument of the program. The pathname of the existing file and the pathname of the new file should also be specified through arguments of the program. The format of the command for running the program is as follows (Important! If you don't follow strictly, the script testing your program may not be able to run your program correctly, and you may get lower grades).
+
+./hw1_1 -n #bytes -i pathname_existing_file -o pathname_new_file
+
+#bytes: the number of bytes each read() system call reads from the existing file (it is also the number of bytes each write() system call writes into the new file).
+
+pathname_existing_file: the pathname of the existing file
+
+pathname_new_file: the pathname of the new file.
+
+4. Your program should be able to handle the following common errors: 1) opening a non_existent file, 2) creating a file in a directory where you have no access.
+
+5. The new file should be identical to the existing file when the program finishes running. 
+
+6. The program does generate any other output other than the new file.
+
+Grading:
+
+1. The executable file can be successfully generated with gcc ---- +5 points
+
+gcc your_program_file -o hw1_1
+
+2. The program can finish within 1 minute without crash when it is run with the following commands: ---- +10 points
+
+START=$(date +%s.%N)
+
+./hw1_1 -n 100 -i /etc/passwd -o /tmp/hw1_1.output
+
+END=$(date +%s.%N)
+
+DIFF2=$(echo "$END - $START" | bc)
+
+if [ $DIFF2 -lt 60 ]; then
+
+    echo  "rule2: $entry: 10"
+
+fi
+
+3. There is a non-empty (length>0) new file generated as specified by the pathname of the new file in the command line. ---- +5 points
+
+4. The new file generated is identical to the existing file. --- +10 points
+
+chk1=`cksum /etc/passwd | awk -F" " '{print $1}'`
+
+chk2=`cksum /tmp/hw1_1 | awk -F" " '{print $1}'`
+
+if [ $chk1 -eq $chk2 ]; then
+
+    echo  "rule3,rule4: $entry: 15"
+
+fi
+
+5. Error message should be generated if a non-existent file is specified after -i in the command line. ---- +5 points
+
+./hw1_1 -n 2184 -i ./non_exsit_file -o /tmp/hw1_1.output
+
+6. Error message should be generated when the new file cannot be created. ---- +5 points
+
+./hw1_1 -n 2184 -i /etc/passwd -o /
+
+7. The program should be able to overwrite if pathname_new_file specifies an existing file. --- +5 points
+
+touch /tmp/hw1_1.output
+
+./hw1_1 -n 2184 -i /etc/passwd -o /tmp/hw1_1.output
+
+8. The execution time is shorter when running with #bytes equal to 100 than the execution time with #bytes equal to 10. --- +5 points
+
+START=$(date +%s.%N) &> /dev/null
+
+./hw1_1 -n 100 -i /etc/passwd -o /tmp/hw1_1.output &> /dev/null &
+
+END=$(date +%s.%N) &> /dev/null
+
+DIFF1=$(echo "$END - $START" | bc)
+
+START=$(date +%s.%N) &> /dev/null
+
+./hw1_1 -n 1000 -i /etc/passwd -o /tmp/hw1_1.output &> /dev/null &
+
+END=$(date +%s.%N) &> /dev/null
+
+DIFF2=$(echo "$END - $START" | bc)
+
+if (( $(echo "$DIFF2 < $DIFF1" | bc -l) )); then
+
+echo  "rule8: $entry: 5"
+
+fi
+
+Note, your program will automatically show this feature if your program really reads #bytes with every read() call and writes #bytes with every write() call.
+
+The execution times will be obtained with the following commands:
+
+dd if=/dev/zero of=/tmp/hw1_1.input bs=2048 count=2048
+
+time ./hw1_1 -n 10 -i /tmp/hw1_1.input -o /tmp/hw1_1.output
+
+time ./hw1_1 -n 100 -i /tmp/hw1_1.input -o /tmp/hw1_1.output
